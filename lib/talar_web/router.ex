@@ -1,4 +1,5 @@
 defmodule TalarWeb.Router do
+
   use TalarWeb, :router
 
   pipeline :browser do
@@ -21,6 +22,9 @@ defmodule TalarWeb.Router do
     get "/login", LoginController, :index
     post "/login", LoginController, :create
 
+    live "/chats", ChatLive.Index, :index
+    live "/chats/new", ChatLive.Index, :new
+    live "/chats/:id", ChatLive.Show, :show
 #    live_session :default, on_mount: [{TalarWeb.UserAuth, :current_user}] do
 #      live "/signin", SignInLive, :index
 #    end

@@ -18,7 +18,7 @@ defmodule TalarWeb.LoginController do
       conn
       |> put_flash(:info, "Login successful!")
       |> put_user_in_session(user_params)
-      |> redirect(to: ~p"/")
+      |> redirect(to: ~p"/chats")
     else
       conn
       |> render(:index, layout: false, changeset: changeset)
