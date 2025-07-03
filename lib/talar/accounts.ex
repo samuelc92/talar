@@ -1,22 +1,19 @@
 defmodule Talar.Accounts do
-  @moduledoc """
-  The Accounts context.
-  """
-
   import Ecto.Query, warn: false
-  alias Talar.Repo
 
+  alias Talar.Repo
   alias Talar.Accounts.User
 
-  @doc """
-  Returns the list of users.
+  @pubsub Talar.PubSub
 
-  ## Examples
+  def subscribe do
+    Phoenix.PubSub.subscribe(@pubsub, "users")
+  end
 
-      iex> list_users()
-      [%User{}, ...]
+  def unsubscribe do
+    Phoenix.PubSub.unsubscribe(@pubsub, "users")
+  end
 
-  """
   def list_users do
     Repo.all(User)
   end

@@ -1,11 +1,27 @@
 defmodule TalarWeb.ChatLive.Index do
   use TalarWeb, :live_view
 
+  alias Talar.Accounts
   #alias Talar.Chats
   #alias Talar.Chats.Chat
 
   @impl true
-  def mount(_params, _session, socket) do
+  def mount(_params, session, socket) do
+    current_user = session["current_user"]
+    username = current_user["username"]
+    users_online = [current_user]
+
+    if connected?(socket) do
+     Accounts.subscribe()
+     Phoenix.PubSub.local_broadcast(Talar.PubSub, "users", "User #{username} is online")
+    end
+
+    socket =
+      socket
+      #|> stream(:users_online, users_online)
+      |> assign(:users_online, users_online)
+      |> assign(:current_user, session["current_user"])
+
     {:ok, socket}
     #{:ok, stream(socket, :chats, [])}
     #{:ok, stream(socket, :chats, Chats.list_chats())}
@@ -35,9 +51,9 @@ defmodule TalarWeb.ChatLive.Index do
   end
 
   @impl true
-  def handle_info({TalarWeb.ChatLive.FormComponent, {:saved, chat}}, socket) do
-    {:noreply, stream_insert(socket, :chats, chat)}
-  end
+  #def handle_info({TalarWeb.ChatLive.FormComponent, {:saved, chat}}, socket) do
+  #  {:noreply, stream_insert(socket, :chats, chat)}
+  #end
 
   @impl true
   def handle_event("delete", %{"id" => id}, socket) do
@@ -47,4 +63,10 @@ defmodule TalarWeb.ChatLive.Index do
     #{:noreply, stream_delete(socket, :chats, chat)}
     {:noreply, stream_delete(socket, :chats, nil)}
   end
+
+  def handle_info(message, socket) do
+    IO.inspect("Message subscribed #{message}")
+    {:noreply, socket}
+  end
+
 end
