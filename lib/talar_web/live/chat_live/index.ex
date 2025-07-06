@@ -1,7 +1,10 @@
 defmodule TalarWeb.ChatLive.Index do
+alias TalarWeb.UserAuth
   use TalarWeb, :live_view
 
   alias Talar.Accounts
+  alias Talar.Accounts.Events
+  alias Talar.Accounts.User
   #alias Talar.Chats
   #alias Talar.Chats.Chat
 
@@ -9,11 +12,11 @@ defmodule TalarWeb.ChatLive.Index do
   def mount(_params, session, socket) do
     current_user = session["current_user"]
     username = current_user["username"]
-    users_online = [current_user]
+    users_online = [%User{username: current_user["username"], email: current_user["email"]}]
 
     if connected?(socket) do
-     Accounts.subscribe()
-     Phoenix.PubSub.local_broadcast(Talar.PubSub, "users", "User #{username} is online")
+      Accounts.subscribe()
+      Accounts.broadcast(%Events.UserOnline{username: username, timestamp: DateTime.utc_now()})
     end
 
     socket =
@@ -50,7 +53,7 @@ defmodule TalarWeb.ChatLive.Index do
     |> assign(:chat, nil)
   end
 
-  @impl true
+  #@impl true
   #def handle_info({TalarWeb.ChatLive.FormComponent, {:saved, chat}}, socket) do
   #  {:noreply, stream_insert(socket, :chats, chat)}
   #end
@@ -64,9 +67,22 @@ defmodule TalarWeb.ChatLive.Index do
     {:noreply, stream_delete(socket, :chats, nil)}
   end
 
-  def handle_info(message, socket) do
-    IO.inspect("Message subscribed #{message}")
-    {:noreply, socket}
+  @impl true
+  def handle_info(
+      {Accounts, %Events.UserOnline{} = user_online},
+      socket
+    ) do
+    IO.inspect("User #{user_online.username} is online at #{user_online.timestamp}")
+    user = %User{username: user_online.username, email: "ttt"}
+
+    if (user_online.username == socket.assigns.current_user["username"] || Enum.member?(socket.assigns.users_online, user)) do
+      {:noreply, socket}
+    else
+      {
+        :noreply,
+        socket |> assign(:users_online, socket.assigns.users_online ++ [user])
+      }
+    end
   end
 
 end

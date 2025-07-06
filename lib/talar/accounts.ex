@@ -14,6 +14,10 @@ defmodule Talar.Accounts do
     Phoenix.PubSub.unsubscribe(@pubsub, "users")
   end
 
+  def broadcast(msg) do
+    Phoenix.PubSub.local_broadcast(@pubsub, "users", {__MODULE__, msg})
+  end
+
   def list_users do
     Repo.all(User)
   end
