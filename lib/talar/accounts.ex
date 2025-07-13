@@ -22,6 +22,19 @@ defmodule Talar.Accounts do
     Repo.all(User)
   end
 
+  def get_user_by_email(email) do
+    Repo.get_by(User, email: email)
+  end
+
+  def create_or_update_user(user_params) do
+    user = get_user_by_email(user_params["email"])
+    if user == nil do
+      create_user(user_params)
+    else
+      update_user(user, %{status: :online})
+    end
+  end
+
   @doc """
   Gets a single user.
 

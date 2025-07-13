@@ -2,6 +2,7 @@ defmodule TalarWeb.LoginController do
   use TalarWeb, :controller
 
   alias Talar.Accounts.User
+  alias Talar.Accounts
 
   def index(conn, _params) do
     changeset = User.changeset(%User{}, %{})
@@ -15,10 +16,19 @@ defmodule TalarWeb.LoginController do
     if changeset.valid? do
       # Here you would typically authenticate the user
       # For now, we'll just redirect to a success page
-      conn
-      |> put_flash(:info, "Login successful!")
-      |> put_user_in_session(user_params)
-      |> redirect(to: ~p"/chats")
+      case Accounts.create_or_update_user(user_params) do
+        {:ok, _user} ->
+          conn
+          |> put_flash(:info, "Login successful!")
+          |> put_user_in_session(user_params)
+          |> redirect(to: ~p"/chats")
+
+        {:error, error} ->
+          IO.inspect(error, label: "Login Error")
+          conn
+          |> put_flash(:error, "Login failed!")
+          |> redirect(to: ~p"/login")
+      end
     else
       conn
       |> render(:index, layout: false, changeset: changeset)
