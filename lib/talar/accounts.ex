@@ -18,6 +18,10 @@ defmodule Talar.Accounts do
     Phoenix.PubSub.local_broadcast(@pubsub, "users", {__MODULE__, msg})
   end
 
+  def list_online_users_but(email) do
+    Repo.all(from u in User, where: u.status == :online and u.email != ^email)
+  end
+
   def list_users do
     Repo.all(User)
   end

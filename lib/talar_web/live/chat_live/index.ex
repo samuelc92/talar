@@ -1,5 +1,5 @@
 defmodule TalarWeb.ChatLive.Index do
-alias TalarWeb.UserAuth
+  alias TalarWeb.UserAuth
   use TalarWeb, :live_view
 
   alias Talar.Accounts
@@ -12,7 +12,7 @@ alias TalarWeb.UserAuth
   def mount(_params, session, socket) do
     current_user = session["current_user"]
     username = current_user["username"]
-    users_online = [%User{username: current_user["username"], email: current_user["email"]}]
+    users_online = Accounts.list_online_users_but(current_user["email"]) #[%User{username: current_user["username"], email: current_user["email"]}]
 
     if connected?(socket) do
       Accounts.subscribe()
@@ -59,12 +59,14 @@ alias TalarWeb.UserAuth
   #end
 
   @impl true
-  def handle_event("delete", %{"id" => id}, socket) do
+  #def handle_event("delete", %{"id" => id}, socket) do
+  def handle_event("open_chat", %{"username" => username}, socket) do
     #chat = Chats.get_chat!(id)
     #{:ok, _} = Chats.delete_chat(chat)
 
     #{:noreply, stream_delete(socket, :chats, chat)}
-    {:noreply, stream_delete(socket, :chats, nil)}
+    IO.inspect("User #{username} deleted")
+    {:noreply, socket}
   end
 
   @impl true
@@ -84,5 +86,4 @@ alias TalarWeb.UserAuth
       }
     end
   end
-
 end

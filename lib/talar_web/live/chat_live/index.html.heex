@@ -11,8 +11,13 @@
           <%= for user <- @users_online do %>
             <div class="flex items-center p-4 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
               <div class="w-3 h-3 bg-green-500 rounded-full mr-3"></div>
-              <div class="flex-1">
-                <div class="font-medium text-gray-900"><%= user.username %></div>
+              <div
+                class="flex-1 cursor-pointer hover:text-blue-600 transition-colors"
+                phx-click={JS.push("open_chat", value: %{username: user.username})}
+              >
+                <div class="font-medium text-gray-900">
+                  <%= user.username %>
+                </div>
                 <div class="text-sm text-gray-500">Online</div>
               </div>
             </div>
