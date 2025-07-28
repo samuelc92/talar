@@ -1,18 +1,20 @@
 defmodule TalarWeb.ChatLive.Index do
+  alias Talar.Chats.ChatUser
   alias TalarWeb.UserAuth
   use TalarWeb, :live_view
 
+  alias Phoenix.HTML.Format
   alias Talar.Accounts
-  alias Talar.Accounts.Events
-  alias Talar.Accounts.User
-  #alias Talar.Chats
-  #alias Talar.Chats.Chat
+  alias Talar.Accounts.{Events, User}
+  alias Talar.Chats
 
   @impl true
   def mount(_params, session, socket) do
-    current_user = session["current_user"]
-    username = current_user["username"]
-    users_online = Accounts.list_online_users_but(current_user["email"]) #[%User{username: current_user["username"], email: current_user["email"]}]
+    current_user_session = session["current_user"]
+    username = current_user_session["username"]
+    current_user = Accounts.get_user_by_username(username)
+    users_online = Accounts.list_online_users_but(current_user.email)
+    form = to_form(ChatUser.changeset(%ChatUser{}, %{}))
 
     if connected?(socket) do
       Accounts.subscribe()
@@ -21,13 +23,11 @@ defmodule TalarWeb.ChatLive.Index do
 
     socket =
       socket
-      #|> stream(:users_online, users_online)
       |> assign(:users_online, users_online)
-      |> assign(:current_user, session["current_user"])
+      |> assign(:current_user, current_user)
+      |> assign(:form, form)
 
     {:ok, socket}
-    #{:ok, stream(socket, :chats, [])}
-    #{:ok, stream(socket, :chats, Chats.list_chats())}
   end
 
   @impl true
@@ -53,17 +53,33 @@ defmodule TalarWeb.ChatLive.Index do
     |> assign(:chat, nil)
   end
 
-  #@impl true
-  #def handle_info({TalarWeb.ChatLive.FormComponent, {:saved, chat}}, socket) do
-  #  {:noreply, stream_insert(socket, :chats, chat)}
-  #end
+  @impl true
+  def handle_event(
+    "send_message",
+    chat_user,
+    socket
+  ) do
+    IO.inspect(chat_user)
+    current_user = socket.assigns.current_user
+    current_chat_id = socket.assigns.current_chat_id
+    # TODO: WIP
+    case Chats.create_chat_user(%{user_id: current_user.id, chat_id: current_chat_id, message: chat_user["message"]}) do
+      {:ok, _chat_user} -> {:noreply, socket}
+      {:error, _changeset} -> {:noreply, socket}
+    end
+    {:noreply, stream_insert(socket, :chats, %ChatUser{user_id: current_user.id, chat_id: current_chat_id, message: chat_user["message"], inserted_at: DateTime.utc_now()})}
+  end
 
   @impl true
-  #def handle_event("delete", %{"id" => id}, socket) do
   def handle_event("open_chat", %{"username" => username}, socket) do
-    #{:ok, _} = Chats.delete_chat(chat)
-    IO.inspect("User #{username} deleted")
-    {:noreply, socket}
+    user = Accounts.get_user_by_username(username)
+    current_user = Accounts.get_user_by_username(socket.assigns.current_user.username)
+    chat = Chats.get_chat_by_user_preloaded(current_user.id, user.id)
+
+    {
+      :noreply,
+      stream(assign(socket, :current_chat_id, chat.id), :chats, chat.chat_users, reset: true)
+    }
   end
 
   @impl true
@@ -74,7 +90,7 @@ defmodule TalarWeb.ChatLive.Index do
     IO.inspect("User #{user_online.username} is online at #{user_online.timestamp}")
     user = %User{username: user_online.username, email: "ttt"}
 
-    if (user_online.username == socket.assigns.current_user["username"] || Enum.member?(socket.assigns.users_online, user)) do
+    if (user_online.username == socket.assigns.current_user.username || Enum.member?(socket.assigns.users_online, user)) do
       {:noreply, socket}
     else
       {
