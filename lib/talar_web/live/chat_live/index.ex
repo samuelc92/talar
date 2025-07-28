@@ -61,10 +61,7 @@ defmodule TalarWeb.ChatLive.Index do
   @impl true
   #def handle_event("delete", %{"id" => id}, socket) do
   def handle_event("open_chat", %{"username" => username}, socket) do
-    #chat = Chats.get_chat!(id)
     #{:ok, _} = Chats.delete_chat(chat)
-
-    #{:noreply, stream_delete(socket, :chats, chat)}
     IO.inspect("User #{username} deleted")
     {:noreply, socket}
   end

@@ -6,7 +6,6 @@
     </div>
     <div class="flex-1 overflow-y-auto">
       <div class="p-2">
-        <!-- Sample online users - replace with dynamic data later -->
         <div class="space-y-1">
           <%= for user <- @users_online do %>
             <div class="flex items-center p-4 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
@@ -40,45 +39,56 @@
     <!-- Messages area -->
     <div class="flex-1 overflow-y-auto p-4 bg-gray-50">
       <div class="space-y-4">
-        <!-- Sample messages - replace with dynamic data later -->
-        <div class="flex">
-          <div class="bg-white rounded-lg p-3 shadow-sm max-w-xs">
-            <div class="text-sm font-medium text-gray-900 mb-1">Alice Johnson</div>
-            <div class="text-gray-700">Hey there! How are you doing?</div>
-            <div class="text-xs text-gray-500 mt-1">2:30 PM</div>
+        <%= if assigns[:streams] && assigns.streams[:chats] do %>
+          <%= for {_id, chat_user} <- @streams.chats do %>
+            <%= if @current_user.id == chat_user.user_id do %>
+              <div class="flex">
+                <div class="bg-blue-500 text-white rounded-lg p-3 shadow-sm max-w-xs">
+                  <div class="text-sm font-medium mb-1">You</div>
+                  <div><%= chat_user.message %></div>
+                  <div class="text-xs text-blue-100 mt-1">
+                    <%= Calendar.strftime(chat_user.inserted_at, "%I:%M %p") %>
+                  </div>
+                </div>
+              </div>
+            <% else %>
+              <div class="flex justify-end">
+                <div class="bg-white rounded-lg p-3 shadow-sm max-w-xs">
+                  <div class="text-sm font-medium text-gray-900 mb-1">Samuel</div>
+                  <div class="text-gray-700"><%= chat_user.message %></div>
+                  <div class="text-xs text-gray-500 mt-1">
+                    <%= Calendar.strftime(chat_user.inserted_at, "%I:%M %p") %>
+                  </div>
+                </div>
+              </div>
+            <% end %>
+          <% end %>
+        <% else %>
+          <div class="flex items-center justify-center h-full">
+            <div class="text-gray-500 text-center">
+              No messages yet. Start a conversation!
+            </div>
           </div>
-        </div>
-
-        <div class="flex justify-end">
-          <div class="bg-blue-500 text-white rounded-lg p-3 shadow-sm max-w-xs">
-            <div class="text-sm font-medium mb-1">You</div>
-            <div>I'm doing great! Thanks for asking. How about you?</div>
-            <div class="text-xs text-blue-100 mt-1">2:32 PM</div>
-          </div>
-        </div>
-
-        <div class="flex">
-          <div class="bg-white rounded-lg p-3 shadow-sm max-w-xs">
-            <div class="text-sm font-medium text-gray-900 mb-1">Alice Johnson</div>
-            <div class="text-gray-700">I'm doing well too! Working on some exciting projects.</div>
-            <div class="text-xs text-gray-500 mt-1">2:35 PM</div>
-          </div>
-        </div>
+        <% end %>
       </div>
     </div>
 
     <!-- Message input -->
     <div class="bg-white border-t border-gray-200 p-4">
-      <div class="flex space-x-2">
-        <input
-          type="text"
-          placeholder="Type your message..."
-          class="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-        />
-        <button class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg font-medium transition-colors">
-          Send
-        </button>
-      </div>
+      <.simple_form for={@form} phx-submit="send_message" class="w-full">
+        <div class="flex space-x-2">
+          <.input
+            name="message"
+            type="text"
+            field={@form[:message]}
+            placeholder="Type your message..."
+            class="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          />
+          <.button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg font-medium transition-colors">
+            Send
+          </.button>
+        </div>
+      </.simple_form>
     </div>
   </div>
 </div>

@@ -1,12 +1,14 @@
 defmodule Talar.Accounts.User do
   use Ecto.Schema
   import Ecto.Changeset
+  alias Talar.Chats.{Chat, ChatUser}
 
   schema "users" do
     field :username, :string
     field :email, :string
     field :status, Ecto.Enum, values: [offline: 0, online: 1, away: 2], default: :offline
 
+    has_many :chat_users, ChatUser
     timestamps(type: :utc_datetime)
   end
 

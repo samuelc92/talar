@@ -30,6 +30,10 @@ defmodule Talar.Accounts do
     Repo.get_by(User, email: email)
   end
 
+  def get_user_by_username(username) do
+    Repo.get_by(User, username: username)
+  end
+
   def create_or_update_user(user_params) do
     user = get_user_by_email(user_params["email"])
     if user == nil do
