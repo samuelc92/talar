@@ -28,6 +28,10 @@ defmodule Talar.Chats do
       preload: [:chat_users])
   end
 
+  def get_chat_users_by_chat_id(chat_id) do
+    Repo.all_by(ChatUser, chat_id: chat_id)
+  end
+
   @doc """
   Gets a single chat.
 

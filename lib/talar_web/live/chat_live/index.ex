@@ -62,12 +62,12 @@ defmodule TalarWeb.ChatLive.Index do
     IO.inspect(chat_user)
     current_user = socket.assigns.current_user
     current_chat_id = socket.assigns.current_chat_id
-    # TODO: WIP
-    case Chats.create_chat_user(%{user_id: current_user.id, chat_id: current_chat_id, message: chat_user["message"]}) do
-      {:ok, _chat_user} -> {:noreply, socket}
-      {:error, _changeset} -> {:noreply, socket}
+    with {:ok, _chat_user} <- Chats.create_chat_user(%{user_id: current_user.id, chat_id: current_chat_id, message: chat_user["message"]}),
+         chat_users <- Chats.get_chat_users_by_chat_id(current_chat_id) do
+      {:noreply, stream(socket, :chats, chat_users)}
+    else
+      {:error, _} -> {:noreply, socket}
     end
-    {:noreply, stream_insert(socket, :chats, %ChatUser{user_id: current_user.id, chat_id: current_chat_id, message: chat_user["message"], inserted_at: DateTime.utc_now()})}
   end
 
   @impl true
