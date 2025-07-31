@@ -59,7 +59,6 @@ defmodule TalarWeb.ChatLive.Index do
     chat_user,
     socket
   ) do
-    IO.inspect(chat_user)
     current_user = socket.assigns.current_user
     current_chat_id = socket.assigns.current_chat_id
     with {:ok, _chat_user} <- Chats.create_chat_user(%{user_id: current_user.id, chat_id: current_chat_id, message: chat_user["message"]}),
