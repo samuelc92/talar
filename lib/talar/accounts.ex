@@ -10,12 +10,20 @@ defmodule Talar.Accounts do
     Phoenix.PubSub.subscribe(@pubsub, "users")
   end
 
+  def subscribe(user_id), do: Phoenix.PubSub.subscribe(@pubsub, topic(user_id))
+
   def unsubscribe do
     Phoenix.PubSub.unsubscribe(@pubsub, "users")
   end
 
+  defp topic(user_id), do: "user:#{user_id}"
+
   def broadcast(msg) do
     Phoenix.PubSub.local_broadcast(@pubsub, "users", {__MODULE__, msg})
+  end
+
+  def broadcast(msg, user_id) do
+    Phoenix.PubSub.local_broadcast(@pubsub, topic(user_id), {__MODULE__, msg})
   end
 
   def list_online_users_but(email) do

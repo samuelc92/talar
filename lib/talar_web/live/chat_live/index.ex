@@ -1,8 +1,8 @@
 defmodule TalarWeb.ChatLive.Index do
-  alias Talar.Chats.ChatUser
-  alias TalarWeb.UserAuth
   use TalarWeb, :live_view
 
+  alias Talar.Chats.ChatUser
+  alias TalarWeb.UserAuth
   alias Phoenix.HTML.Format
   alias Talar.Accounts
   alias Talar.Accounts.{Events, User}
@@ -17,6 +17,7 @@ defmodule TalarWeb.ChatLive.Index do
     form = to_form(ChatUser.changeset(%ChatUser{}, %{}))
 
     if connected?(socket) do
+      Accounts.subscribe(current_user.id)
       Accounts.subscribe()
       Accounts.broadcast(%Events.UserOnline{username: username, timestamp: DateTime.utc_now()})
     end
@@ -62,8 +63,18 @@ defmodule TalarWeb.ChatLive.Index do
     current_user = socket.assigns.current_user
     current_chat_id = socket.assigns.current_chat_id
     with {:ok, _chat_user} <- Chats.create_chat_user(%{user_id: current_user.id, chat_id: current_chat_id, message: chat_user["message"]}),
-         chat_users <- Chats.get_chat_users_by_chat_id(current_chat_id) do
-      {:noreply, stream(socket, :chats, chat_users)}
+         chat_users <- Chats.get_chat_users_by_chat_id(current_chat_id),
+         chat <- Chats.get_chat!(current_chat_id) do
+
+      receiver_user_id = if chat.user_id_1 == current_user.id do
+        chat.user_id_2
+      else
+        chat.user_id_1
+      end
+
+      Accounts.broadcast(%Events.ReceivedMessage{chat_id: current_chat_id, timestamp: DateTime.utc_now()}, receiver_user_id)
+      form = to_form(ChatUser.changeset(%ChatUser{}, %{message: ""}))
+      {:noreply, stream(assign(socket, form: form), :chats, chat_users)}
     else
       {:error, _} -> {:noreply, socket}
     end
@@ -97,5 +108,16 @@ defmodule TalarWeb.ChatLive.Index do
         socket |> assign(:users_online, socket.assigns.users_online ++ [user])
       }
     end
+  end
+
+  @impl true
+  def handle_info(
+      {Accounts, %Events.ReceivedMessage{} = message},
+      socket
+    ) do
+    IO.inspect("Chat id #{message.chat_id} received at #{message.timestamp}")
+    current_user = socket.assigns.current_user
+    IO.inspect("I am #{current_user.username}")
+    {:noreply, socket}
   end
 end
