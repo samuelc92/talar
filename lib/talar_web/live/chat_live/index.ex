@@ -73,6 +73,8 @@ defmodule TalarWeb.ChatLive.Index do
       end
 
       Accounts.broadcast(%Events.ReceivedMessage{chat_id: current_chat_id, timestamp: DateTime.utc_now()}, receiver_user_id)
+      #TODO: There is a bug when the user sends the first messsage it works.
+      # However from the second message the text field is not cleared.
       form = to_form(ChatUser.changeset(%ChatUser{}, %{message: ""}))
       {:noreply, stream(assign(socket, form: form), :chats, chat_users)}
     else
@@ -86,9 +88,13 @@ defmodule TalarWeb.ChatLive.Index do
     current_user = Accounts.get_user_by_username(socket.assigns.current_user.username)
     chat = Chats.get_chat_by_user_preloaded(current_user.id, user.id)
 
+    socket = socket
+      |> assign(:current_chat_id, chat.id)
+      |> assign(:open_chat_id, chat.id)
+
     {
       :noreply,
-      stream(assign(socket, :current_chat_id, chat.id), :chats, chat.chat_users, reset: true)
+      stream(socket, :chats, chat.chat_users, reset: true)
     }
   end
 
@@ -98,6 +104,7 @@ defmodule TalarWeb.ChatLive.Index do
       socket
     ) do
     IO.inspect("User #{user_online.username} is online at #{user_online.timestamp}")
+    #TODO: Fetch user from database
     user = %User{username: user_online.username, email: "ttt"}
 
     if (user_online.username == socket.assigns.current_user.username || Enum.member?(socket.assigns.users_online, user)) do
@@ -117,7 +124,15 @@ defmodule TalarWeb.ChatLive.Index do
     ) do
     IO.inspect("Chat id #{message.chat_id} received at #{message.timestamp}")
     current_user = socket.assigns.current_user
+    open_chat_id = socket.assigns.open_chat_id
     IO.inspect("I am #{current_user.username}")
-    {:noreply, socket}
+
+    #TODO: Implement notification when user gets a message
+    if open_chat_id == nil || open_chat_id != message.chat_id do
+      {:noreply, socket}
+    end
+
+    chat_users = Chats.get_chat_users_by_chat_id(message.chat_id)
+    {:noreply, stream(socket, :chats, chat_users)}
   end
 end
