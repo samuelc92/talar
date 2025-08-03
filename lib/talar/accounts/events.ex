@@ -1,6 +1,7 @@
 defmodule Talar.Accounts.Events do
   defmodule UserOnline do
-    defstruct [:username, :timestamp]
+    alias Talar.Accounts.User
+    defstruct user: %User{}, timestamp: DateTime.utc_now()
   end
 
   defmodule ReceivedMessage do

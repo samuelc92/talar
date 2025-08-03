@@ -17,7 +17,7 @@ defmodule TalarWeb.ChatLive.Index do
     if connected?(socket) do
       Accounts.subscribe(current_user.id)
       Accounts.subscribe()
-      Accounts.broadcast(%Events.UserOnline{username: username, timestamp: DateTime.utc_now()})
+      Accounts.broadcast(%Events.UserOnline{user: current_user, timestamp: DateTime.utc_now()})
     end
 
     socket =
@@ -78,18 +78,24 @@ defmodule TalarWeb.ChatLive.Index do
       {Accounts, %Events.UserOnline{} = user_online},
       socket
     ) do
-    IO.inspect("User #{user_online.username} is online at #{user_online.timestamp}")
-    #TODO: Fetch user from database
-    user = %User{username: user_online.username, email: "ttt"}
-
-    if (user_online.username == socket.assigns.current_user.username || Enum.member?(socket.assigns.users_online, user)) do
+    IO.inspect(user_online)
+    #if (user_online.user.username == socket.assigns.current_user.username || Enum.member?(socket.assigns.users_online, user_online.user)) do
+    if is_current_user?(user_online.user, socket) || is_user_duplicated?(user_online.user, socket) do
       {:noreply, socket}
     else
       {
         :noreply,
-        socket |> assign(:users_online, socket.assigns.users_online ++ [user])
+        socket |> assign(:users_online, socket.assigns.users_online ++ [user_online.user])
       }
     end
+  end
+
+  defp is_current_user?(user, socket) do
+    user.username == socket.assigns.current_user.username
+  end
+
+  defp is_user_duplicated?(user, socket) do
+    Enum.member?(socket.assigns.users_online, user)
   end
 
   @impl true
