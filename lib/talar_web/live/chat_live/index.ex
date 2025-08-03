@@ -3,7 +3,7 @@ defmodule TalarWeb.ChatLive.Index do
 
   alias Talar.Chats.ChatUser
   alias Talar.Accounts
-  alias Talar.Accounts.{Events, User}
+  alias Talar.Accounts.{Events}
   alias Talar.Chats
 
   @impl true
@@ -66,36 +66,12 @@ defmodule TalarWeb.ChatLive.Index do
     socket = socket
       |> assign(:current_chat_id, chat.id)
       |> assign(:open_chat_id, chat.id)
+      |> assign(:chat_with_username, username)
 
     {
       :noreply,
       stream(socket, :chats, chat.chat_users, reset: true)
     }
-  end
-
-  @impl true
-  def handle_info(
-      {Accounts, %Events.UserOnline{} = user_online},
-      socket
-    ) do
-    IO.inspect(user_online)
-    #if (user_online.user.username == socket.assigns.current_user.username || Enum.member?(socket.assigns.users_online, user_online.user)) do
-    if is_current_user?(user_online.user, socket) || is_user_duplicated?(user_online.user, socket) do
-      {:noreply, socket}
-    else
-      {
-        :noreply,
-        socket |> assign(:users_online, socket.assigns.users_online ++ [user_online.user])
-      }
-    end
-  end
-
-  defp is_current_user?(user, socket) do
-    user.username == socket.assigns.current_user.username
-  end
-
-  defp is_user_duplicated?(user, socket) do
-    Enum.member?(socket.assigns.users_online, user)
   end
 
   @impl true
@@ -115,5 +91,29 @@ defmodule TalarWeb.ChatLive.Index do
 
     chat_users = Chats.get_chat_users_by_chat_id(message.chat_id)
     {:noreply, stream(socket, :chats, chat_users)}
+  end
+
+  @impl true
+  def handle_info(
+      {Accounts, %Events.UserOnline{} = user_online},
+      socket
+    ) do
+    IO.inspect(user_online)
+    if is_current_user?(user_online.user, socket) || is_user_duplicated?(user_online.user, socket) do
+      {:noreply, socket}
+    else
+      {
+        :noreply,
+        socket |> assign(:users_online, socket.assigns.users_online ++ [user_online.user])
+      }
+    end
+  end
+
+  defp is_current_user?(user, socket) do
+    user.username == socket.assigns.current_user.username
+  end
+
+  defp is_user_duplicated?(user, socket) do
+    Enum.member?(socket.assigns.users_online, user)
   end
 end
