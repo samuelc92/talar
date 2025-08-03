@@ -51,7 +51,7 @@ defmodule TalarWeb.SignInLive do
   end
 
   def mount(_params, _session, socket) do
-    if user = socket.assigns.current_user do
+    if _user = socket.assigns.current_user do
       # {:ok, redirect(socket, to: profile_path(user))}
       {:ok, socket}
     else

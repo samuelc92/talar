@@ -1,7 +1,7 @@
 defmodule Talar.Accounts.User do
   use Ecto.Schema
   import Ecto.Changeset
-  alias Talar.Chats.{Chat, ChatUser}
+  alias Talar.Chats.{ChatUser}
 
   schema "users" do
     field :username, :string

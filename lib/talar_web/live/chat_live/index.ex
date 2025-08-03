@@ -2,8 +2,6 @@ defmodule TalarWeb.ChatLive.Index do
   use TalarWeb, :live_view
 
   alias Talar.Chats.ChatUser
-  alias TalarWeb.UserAuth
-  alias Phoenix.HTML.Format
   alias Talar.Accounts
   alias Talar.Accounts.{Events, User}
   alias Talar.Chats
@@ -29,29 +27,6 @@ defmodule TalarWeb.ChatLive.Index do
       |> assign(:form, form)
 
     {:ok, socket}
-  end
-
-  @impl true
-  def handle_params(params, _url, socket) do
-    {:noreply, apply_action(socket, socket.assigns.live_action, params)}
-  end
-
-  defp apply_action(socket, :edit, %{"id" => id}) do
-    socket
-    |> assign(:page_title, "Edit Chat")
-    #|> assign(:chat, Chats.get_chat!(id))
-  end
-
-  defp apply_action(socket, :new, _params) do
-    socket
-    |> assign(:page_title, "New Chat")
-    #|> assign(:chat, %Chat{})
-  end
-
-  defp apply_action(socket, :index, _params) do
-    socket
-    |> assign(:page_title, "Listing Chats")
-    |> assign(:chat, nil)
   end
 
   @impl true
