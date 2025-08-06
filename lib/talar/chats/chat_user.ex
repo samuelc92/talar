@@ -8,6 +8,7 @@ defmodule Talar.Chats.ChatUser do
   schema "chat_users" do
 
     field :message, :string
+    #field :was_read, :boolean, default: false
 
     belongs_to :chat, Chat
     belongs_to :user, User

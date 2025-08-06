@@ -6,6 +6,7 @@ defmodule Talar.Repo.Migrations.CreateChatUsers do
       add :chat_id, references(:chats, on_delete: :nothing)
       add :user_id, references(:users, on_delete: :nothing)
       add :message, :string, null: false
+      add :was_read, :boolean, default: false
 
       timestamps(type: :utc_datetime)
     end
