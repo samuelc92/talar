@@ -85,9 +85,8 @@ defmodule TalarWeb.ChatLive.Index do
     open_chat_id = socket.assigns.open_chat_id
     IO.inspect("I am #{current_user.username}")
 
-    #TODO: Implement notification when user gets a message
     if open_chat_id == nil || open_chat_id != message.chat_id do
-      {:noreply, socket}
+      {:noreply, socket |> assign(:unread_messages, Chats.get_count_unresponded_chat_users(current_user.id))}
     end
 
     chat_users = Chats.get_chat_users_by_chat_id(message.chat_id)
