@@ -33,6 +33,25 @@ defmodule Talar.Chats do
   end
 
   @doc """
+  Returns the count of unresponded chat users for a given user.
+
+  ## Examples
+
+      iex> get_count_unresponded_chat_users(user_id)
+      [{1, 3}]
+
+  """
+  def get_count_unresponded_chat_users(user_id) do
+    result = Repo.all(
+      from cu in ChatUser,
+      join: c in Chat, on: cu.chat_id == c.id,
+      where: (c.user_id_1 == ^user_id or c.user_id_2 == ^user_id) and cu.user_id != ^user_id,
+      group_by: [cu.user_id],
+      select: {cu.user_id, count()})
+    Enum.reduce(result, %{}, fn x, acc -> Map.put(acc, elem(x, 0), elem(x, 1)) end)
+  end
+
+  @doc """
   Gets a single chat.
 
   Raises `Ecto.NoResultsError` if the Chat does not exist.

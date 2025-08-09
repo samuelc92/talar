@@ -8,7 +8,7 @@ defmodule Talar.Chats.ChatUser do
   schema "chat_users" do
 
     field :message, :string
-    #field :was_read, :boolean, default: false
+    field :was_read, :boolean, default: false
 
     belongs_to :chat, Chat
     belongs_to :user, User
@@ -18,7 +18,7 @@ defmodule Talar.Chats.ChatUser do
   @doc false
   def changeset(chat_user, attrs) do
     chat_user
-    |> cast(attrs, [:message, :user_id, :chat_id])
+    |> cast(attrs, [:message, :was_read, :user_id, :chat_id])
     |> validate_required([:message, :user_id, :chat_id])
   end
 end

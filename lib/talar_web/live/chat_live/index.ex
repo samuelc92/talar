@@ -25,7 +25,7 @@ defmodule TalarWeb.ChatLive.Index do
       |> assign(:users_online, users_online)
       |> assign(:current_user, current_user)
       |> assign(:form, form)
-      |> assign(:unread_messages, %{"samuel" => 1})
+      |> assign(:unread_messages, Chats.get_count_unresponded_chat_users(current_user.id))
 
     {:ok, socket}
   end
