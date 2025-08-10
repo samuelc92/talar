@@ -16,7 +16,7 @@ defmodule Talar.Chats.Chat do
   @doc false
   def changeset(chat, attrs) do
     chat
-    |> cast(attrs, [])
-    |> validate_required([])
+    |> cast(attrs, [:user_id_1, :user_id_2])
+    |> validate_required([:user_id_1, :user_id_2])
   end
 end
