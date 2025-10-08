@@ -44,6 +44,7 @@ defmodule Talar.Accounts do
 
   def create_or_update_user(user_params) do
     user = get_user_by_email(user_params["email"])
+
     if user == nil do
       create_user(user_params)
     else
