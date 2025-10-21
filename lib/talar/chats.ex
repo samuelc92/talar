@@ -24,8 +24,11 @@ defmodule Talar.Chats do
   def get_chat_by_user_preloaded(current_user_id, user_id) do
     Repo.one(
       from c in Chat,
-      where: (c.user_id_1 == ^current_user_id and c.user_id_2 == ^user_id) or (c.user_id_1 == ^user_id and c.user_id_2 == ^current_user_id),
-      preload: [:chat_users])
+        where:
+          (c.user_id_1 == ^current_user_id and c.user_id_2 == ^user_id) or
+            (c.user_id_1 == ^user_id and c.user_id_2 == ^current_user_id),
+        preload: [:chat_users]
+    )
   end
 
   def get_chat_preloaded!(id) do
@@ -46,12 +49,18 @@ defmodule Talar.Chats do
 
   """
   def get_count_unresponded_chat_users(user_id) do
-    result = Repo.all(
-      from cu in ChatUser,
-      join: c in Chat, on: cu.chat_id == c.id,
-      where: cu.was_read == false and (c.user_id_1 == ^user_id or c.user_id_2 == ^user_id) and cu.user_id != ^user_id,
-      group_by: [cu.user_id],
-      select: {cu.user_id, count()})
+    result =
+      Repo.all(
+        from cu in ChatUser,
+          join: c in Chat,
+          on: cu.chat_id == c.id,
+          where:
+            cu.was_read == false and (c.user_id_1 == ^user_id or c.user_id_2 == ^user_id) and
+              cu.user_id != ^user_id,
+          group_by: [cu.user_id],
+          select: {cu.user_id, count()}
+      )
+
     Enum.reduce(result, %{}, fn x, acc -> Map.put(acc, elem(x, 0), elem(x, 1)) end)
   end
 
@@ -61,7 +70,7 @@ defmodule Talar.Chats do
     |> Repo.update()
   end
 
-  #TODO: Improve database update to send a batch of updates instead of one by one
+  # TODO: Improve database update to send a batch of updates instead of one by one
   def update_unread_chat_users(chat_users) do
     chat_users
     |> Enum.filter(&(&1.was_read == false))

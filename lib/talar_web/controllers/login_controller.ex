@@ -6,6 +6,7 @@ defmodule TalarWeb.LoginController do
 
   def index(conn, _params) do
     changeset = User.changeset(%User{}, %{})
+
     conn
     |> render(:index, layout: false, changeset: changeset)
   end
@@ -25,6 +26,7 @@ defmodule TalarWeb.LoginController do
 
         {:error, error} ->
           IO.inspect(error, label: "Login Error")
+
           conn
           |> put_flash(:error, "Login failed!")
           |> redirect(to: ~p"/login")

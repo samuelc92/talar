@@ -7,13 +7,10 @@ defmodule Talar.AccountsFixtures do
   @doc """
   Generate a user.
   """
-  def user_fixture(attrs \\ %{}) do
+  def user_fixture(attrs \\ %{email: "some email", username: "some username"}) do
     {:ok, user} =
       attrs
-      |> Enum.into(%{
-        email: "some email",
-        username: "some username"
-      })
+      |> Enum.into(%{})
       |> Talar.Accounts.create_user()
 
     user

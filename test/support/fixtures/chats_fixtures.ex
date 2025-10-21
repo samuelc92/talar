@@ -10,9 +10,7 @@ defmodule Talar.ChatsFixtures do
   def chat_fixture(attrs \\ %{}) do
     {:ok, chat} =
       attrs
-      |> Enum.into(%{
-
-      })
+      |> Enum.into(%{})
       |> Talar.Chats.create_chat()
 
     chat
