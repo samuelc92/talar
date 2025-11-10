@@ -1,5 +1,9 @@
 defmodule TalarWeb.Router do
+  # alias TalarWeb.UserLive.UserRegistrationLive
+  # alias TalarWeb.UserLive.UserLoginLive
   use TalarWeb, :router
+
+  import TalarWeb.UserAuth
 
   pipeline :browser do
     plug :accepts, ["html"]
@@ -8,6 +12,7 @@ defmodule TalarWeb.Router do
     plug :put_root_layout, html: {TalarWeb.Layouts, :root}
     plug :protect_from_forgery
     plug :put_secure_browser_headers
+    plug :fetch_current_user
   end
 
   pipeline :api do
@@ -15,18 +20,26 @@ defmodule TalarWeb.Router do
   end
 
   scope "/", TalarWeb do
-    pipe_through :browser
+    pipe_through [:browser, :redirect_if_user_is_authenticated]
 
     get "/", PageController, :home
-    get "/login", LoginController, :index
-    post "/login", LoginController, :create
+    # get "/login", LoginController, :index
+    # post "/login", LoginController, :create
 
-    live "/chats", ChatLive.Index, :index
-    live "/chats/new", ChatLive.Index, :new
-    live "/chats/:id", ChatLive.Show, :show
-    #    live_session :default, on_mount: [{TalarWeb.UserAuth, :current_user}] do
-    #      live "/signin", SignInLive, :index
-    #    end
+    live_session :redirect_if_user_is_authenticated,
+      on_mount: [{TalarWeb.UserAuth, :redirect_if_user_is_authenticated}] do
+      live "/users/register", UserRegistrationLive, :new
+      live "/users/log_in", UserLoginLive, :new
+      live "/users/reset_password/:token", UserResetPasswordLive, :edit
+      live "/chats", ChatLive.Index, :index
+      live "/chats/new", ChatLive.Index, :new
+      live "/chats/:id", ChatLive.Show, :show
+      #    live_session :default, on_mount: [{TalarWeb.UserAuth, :current_user}] do
+      #      live "/signin", SignInLive, :index
+      #    end
+    end
+
+    post "/users/log_in", UserSessionController, :create
   end
 
   # Other scopes may use custom stacks.
