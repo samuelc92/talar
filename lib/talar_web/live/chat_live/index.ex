@@ -8,9 +8,7 @@ defmodule TalarWeb.ChatLive.Index do
 
   @impl true
   def mount(_params, session, socket) do
-    current_user_session = session["current_user"]
-    username = current_user_session["username"]
-    current_user = Accounts.get_user_by_username(username)
+    current_user = socket.assigns.current_user
     users_online = Accounts.list_online_users_but(current_user.email)
     form = to_form(ChatUser.changeset(%ChatUser{}, %{}))
 

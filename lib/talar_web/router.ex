@@ -37,15 +37,20 @@ defmodule TalarWeb.Router do
       live "/users/register", UserLive.UserRegistrationLive, :new
       live "/users/log_in", UserLoginLive, :new
       live "/users/reset_password/:token", UserResetPasswordLive, :edit
-      live "/chats", ChatLive.Index, :index
-      live "/chats/new", ChatLive.Index, :new
-      live "/chats/:id", ChatLive.Show, :show
-      #    live_session :default, on_mount: [{TalarWeb.UserAuth, :current_user}] do
-      #      live "/signin", SignInLive, :index
-      #    end
     end
 
     post "/users/log_in", UserSessionController, :create
+  end
+
+  scope "/", TalarWeb do
+    pipe_through [:browser, :require_authenticated_user]
+
+    live_session :require_authenticated_user,
+      on_mount: [{TalarWeb.UserAuth, :ensure_authenticated}] do
+      live "/chats", ChatLive.Index, :index
+      live "/chats/new", ChatLive.Index, :new
+      live "/chats/:id", ChatLive.Show, :show
+    end
   end
 
   scope "/", TalarWeb do
