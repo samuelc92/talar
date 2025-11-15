@@ -18,7 +18,7 @@ defmodule Talar.Accounts.UserNotifier do
 
   def deliver_confirmation_instructions(user, url) do
     deliver(user.email, "Confirmation instructions", """
-    Hi #{user.name},
+    Hi #{user.username},
 
     You can confirm your account by visiting the URL below:
 

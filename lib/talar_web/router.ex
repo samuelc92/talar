@@ -20,15 +20,21 @@ defmodule TalarWeb.Router do
   end
 
   scope "/", TalarWeb do
-    pipe_through [:browser, :redirect_if_user_is_authenticated]
+    pipe_through :browser
 
     get "/", PageController, :home
+  end
+
+  scope "/", TalarWeb do
+    pipe_through [:browser, :redirect_if_user_is_authenticated]
+
+    # get "/", PageController, :home
     # get "/login", LoginController, :index
     # post "/login", LoginController, :create
 
     live_session :redirect_if_user_is_authenticated,
       on_mount: [{TalarWeb.UserAuth, :redirect_if_user_is_authenticated}] do
-      live "/users/register", UserRegistrationLive, :new
+      live "/users/register", UserLive.UserRegistrationLive, :new
       live "/users/log_in", UserLoginLive, :new
       live "/users/reset_password/:token", UserResetPasswordLive, :edit
       live "/chats", ChatLive.Index, :index
@@ -40,6 +46,14 @@ defmodule TalarWeb.Router do
     end
 
     post "/users/log_in", UserSessionController, :create
+  end
+
+  scope "/", TalarWeb do
+    pipe_through [:browser]
+
+    live_session :current_user,
+      on_mount: [{TalarWeb.UserAuth, :mount_current_user}] do
+    end
   end
 
   # Other scopes may use custom stacks.

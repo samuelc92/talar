@@ -19,9 +19,16 @@ defmodule Talar.Accounts.User do
 
   def registration_changeset(user, attrs, opts \\ []) do
     user
-    |> cast(attrs, [:email, :password])
+    |> cast(attrs, [:username, :email, :password])
+    |> validate_username(opts)
     |> validate_email(opts)
     |> validate_password(opts)
+  end
+
+  def validate_username(changeset, opts) do
+    changeset
+    |> validate_required([:username])
+    |> validate_length(:username, min: 3, max: 20)
   end
 
   @email_regex ~r/^[^\s]+@[^\s]+$/
@@ -65,7 +72,7 @@ defmodule Talar.Accounts.User do
   defp maybe_validate_unique_email(changeset, opts) do
     if Keyword.get(opts, :validate_email, true) do
       changeset
-      |> unsafe_validate_unique(:email, Accounts.Repo)
+      |> unsafe_validate_unique(:email, Talar.Repo)
       |> unique_constraint(:email)
     else
       changeset
