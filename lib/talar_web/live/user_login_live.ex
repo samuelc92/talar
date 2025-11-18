@@ -20,7 +20,7 @@ defmodule TalarWeb.UserLoginLive do
         <.input field={@form[:password]} type="password" label="Password" required />
 
         <:actions>
-          <.input field={@form[:remember_me]} type="checkbox" label="Keep me logged in" required />
+          <.input field={@form[:remember_me]} type="checkbox" label="Keep me logged in" />
           <.link navigate={~p"/users/reset_password"} class="text-sm font-semibold">
             Forgot your password?
           </.link>
@@ -38,8 +38,6 @@ defmodule TalarWeb.UserLoginLive do
   def mount(_params, _session, socket) do
     email = Phoenix.Flash.get(socket.assigns.flash, :email)
     form = to_form(%{"email" => email}, as: "user")
-    IO.inspect("FORMMMM")
-    IO.inspect(form)
     {:ok, assign(socket, form: form), temporary_assigns: [form: form]}
   end
 end

@@ -7,7 +7,7 @@ defmodule TalarWeb.ChatLive.Index do
   alias Talar.Chats
 
   @impl true
-  def mount(_params, session, socket) do
+  def mount(_params, _session, socket) do
     current_user = socket.assigns.current_user
     users_online = Accounts.list_online_users_but(current_user.email)
     form = to_form(ChatUser.changeset(%ChatUser{}, %{}))
@@ -114,6 +114,7 @@ defmodule TalarWeb.ChatLive.Index do
       ) do
     IO.inspect("Chat id #{message.chat_id} received at #{message.timestamp}")
     current_user = socket.assigns.current_user
+    # TODO: Fix the bug when the chat is not found (first time opening a chat)
     open_chat_id = socket.assigns.open_chat_id
     IO.inspect("I am #{current_user.username}")
 
