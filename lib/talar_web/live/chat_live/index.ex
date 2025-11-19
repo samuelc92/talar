@@ -92,16 +92,19 @@ defmodule TalarWeb.ChatLive.Index do
       |> assign(:chat_with_username, username)
       |> assign(:unread_messages, Chats.get_count_unresponded_chat_users(current_user.id))
 
+    chat_users =
+      if Ecto.assoc_loaded?(chat.chat_users) == false || chat.chat_users == nil do
+        []
+      else
+        chat.chat_users
+      end
+
     {
       :noreply,
       stream(
         socket,
         :chats,
-        if chat.chat_users == nil do
-          []
-        else
-          chat.chat_users
-        end,
+        chat_users,
         reset: true
       )
     }
@@ -114,7 +117,6 @@ defmodule TalarWeb.ChatLive.Index do
       ) do
     IO.inspect("Chat id #{message.chat_id} received at #{message.timestamp}")
     current_user = socket.assigns.current_user
-    # TODO: Fix the bug when the chat is not found (first time opening a chat)
     open_chat_id = socket.assigns.open_chat_id
     IO.inspect("I am #{current_user.username}")
 
