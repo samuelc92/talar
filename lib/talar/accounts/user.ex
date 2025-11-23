@@ -25,7 +25,7 @@ defmodule Talar.Accounts.User do
     |> validate_password(opts)
   end
 
-  def validate_username(changeset, opts) do
+  def validate_username(changeset, _opts) do
     changeset
     |> validate_required([:username])
     |> validate_length(:username, min: 3, max: 20)

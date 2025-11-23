@@ -1,6 +1,4 @@
 defmodule TalarWeb.Router do
-  # alias TalarWeb.UserLive.UserRegistrationLive
-  # alias TalarWeb.UserLive.UserLoginLive
   use TalarWeb, :router
 
   import TalarWeb.UserAuth
@@ -59,6 +57,7 @@ defmodule TalarWeb.Router do
 
     live_session :current_user,
       on_mount: [{TalarWeb.UserAuth, :mount_current_user}] do
+      live "/users/confirm/:token", UserLive.UserConfirmationLive, :edit
     end
   end
 

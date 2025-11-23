@@ -10,9 +10,9 @@ defmodule TalarWeb.UserLive.UserConfirmationLive do
 
       <.simple_form for={@form} id="confirmation_form" phx-submit="confirm_account">
         <.input field={@form[:token]} type="hidden" />
-        <:action>
+        <:actions>
           <.button phx-disable-with="Confirming..." class="w-full">Confirm my account</.button>
-        </:action>
+        </:actions>
       </.simple_form>
 
       <p class="text-center mt-4">
