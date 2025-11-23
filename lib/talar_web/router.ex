@@ -36,6 +36,7 @@ defmodule TalarWeb.Router do
       on_mount: [{TalarWeb.UserAuth, :redirect_if_user_is_authenticated}] do
       live "/users/register", UserLive.UserRegistrationLive, :new
       live "/users/log_in", UserLoginLive, :new
+      live "/users/reset_password", UserLive.UserResetPasswordLive, :new
       live "/users/reset_password/:token", UserResetPasswordLive, :edit
     end
 

@@ -71,9 +71,9 @@ defmodule TalarWeb.UserAuth do
     user_token = get_session(conn, :user_token)
     user_token && Accounts.delete_user_session_token(user_token)
 
-    if live_socket_id = get_session(conn, :live_socket_id) do
-      # Accounts.broadcast_user_logout(user_token, live_socket_id)
-    end
+    # if live_socket_id = get_session(conn, :live_socket_id) do
+    # Accounts.broadcast_user_logout(user_token, live_socket_id)
+    # end
 
     conn
     |> renew_session()
